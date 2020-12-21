@@ -38,5 +38,6 @@ dirs:
 	mkdir -p nix/etc/nix
 	touch nix/etc/nix/nix.conf
 	echo "sandbox = false" >> nix/etc/nix/nix.conf
+	echo "experimental-features = nix-command ca-derivations" >> nix/etc/nix/nix.conf
 	mkdir -p nix/store
 	mkdir -p nix/var
