@@ -247,13 +247,16 @@ __PACKAGE__->many_to_many("usernames", "projectmembers", "username");
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:+4yWd9UjCyxxLZYDrVUAxA
 
 my %hint = (
-    columns => [
+    string_columns => [
         "name",
         "displayname",
         "description",
-        "enabled",
-        "hidden",
+        "homepage",
         "owner"
+    ],
+    boolean_columns => [
+      "enabled",
+      "hidden"
     ],
     relations => {
         jobsets => "name"

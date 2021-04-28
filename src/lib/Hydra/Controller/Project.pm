@@ -126,6 +126,7 @@ sub create_jobset : Chained('projectChain') PathPart('create-jobset') Args(0) {
     $c->stash->{template} = 'edit-jobset.tt';
     $c->stash->{create} = 1;
     $c->stash->{totalShares} = getTotalShares($c->model('DB')->schema);
+    $c->stash->{emailNotification} = $c->config->{email_notification} // 0;
 }
 
 
@@ -135,7 +136,7 @@ sub updateProject {
     my $owner = $project->owner;
     if ($c->check_user_roles('admin') and defined $c->stash->{params}->{owner}) {
         $owner = trim $c->stash->{params}->{owner};
-        error($c, "The user name ‘$owner’ does not exist.")
+        badRequest($c, "The user name ‘$owner’ does not exist.")
             unless defined $c->model('DB::Users')->find($owner);
     }
 
