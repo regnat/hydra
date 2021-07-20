@@ -83,26 +83,6 @@ sub build_GET {
         }
     }
 
-    if ($build->finished) {
-        $c->stash->{prevBuilds} = [$c->model('DB::Builds')->search(
-            { project => $c->stash->{project}->name
-            , jobset => $c->stash->{jobset}->name
-            , job => $c->stash->{job}
-            , 'me.system' => $build->system
-            , finished => 1
-            , buildstatus => 0
-            , 'me.id' =>  { '<=' => $build->id }
-            }
-          , { join => "actualBuildStep"
-            , "+select" => ["actualBuildStep.stoptime - actualBuildStep.starttime"]
-            , "+as" => ["actualBuildTime"]
-            , order_by => "me.id DESC"
-            , rows => 50
-            }
-          )
-        ];
-    }
-
     # Get the first eval of which this build was a part.
     ($c->stash->{nrEvals}) = $build->jobsetevals->search({ hasnewbuilds => 1 })->count;
     $c->stash->{eval} = getFirstEval($build);
@@ -580,7 +560,7 @@ sub evals : Chained('buildChain') PathPart('evals') Args(0) {
     $c->stash->{page} = $page;
     $c->stash->{resultsPerPage} = $resultsPerPage;
     $c->stash->{total} = $evals->search({hasnewbuilds => 1})->count;
-    $c->stash->{evals} = getEvals($self, $c, $evals, ($page - 1) * $resultsPerPage, $resultsPerPage)
+    $c->stash->{evals} = getEvals($c, $evals, ($page - 1) * $resultsPerPage, $resultsPerPage)
 }
 
 

@@ -115,10 +115,10 @@ sub jobsetOverview_ {
     return $jobsets->search({},
         { order_by => ["hidden ASC", "enabled DESC", "name"]
         , "+select" =>
-          [ "(select count(*) from Builds as a where a.finished = 0 and me.project = a.project and me.name = a.jobset and a.isCurrent = 1)"
-          , "(select count(*) from Builds as a where a.finished = 1 and me.project = a.project and me.name = a.jobset and buildstatus <> 0 and a.isCurrent = 1)"
-          , "(select count(*) from Builds as a where a.finished = 1 and me.project = a.project and me.name = a.jobset and buildstatus = 0 and a.isCurrent = 1)"
-          , "(select count(*) from Builds as a where me.project = a.project and me.name = a.jobset and a.isCurrent = 1)"
+          [ "(select count(*) from Builds as a where me.id = a.jobset_id and a.finished = 0 and a.isCurrent = 1)"
+          , "(select count(*) from Builds as a where me.id = a.jobset_id and a.finished = 1 and buildstatus <> 0 and a.isCurrent = 1)"
+          , "(select count(*) from Builds as a where me.id = a.jobset_id and a.finished = 1 and buildstatus = 0 and a.isCurrent = 1)"
+          , "(select count(*) from Builds as a where me.id = a.jobset_id and a.isCurrent = 1)"
           ]
         , "+as" => ["nrscheduled", "nrfailed", "nrsucceeded", "nrtotal"]
         });
@@ -223,13 +223,42 @@ sub getEvalInfo {
 }
 
 
-sub getEvals {
-    my ($self, $c, $evals, $offset, $rows) = @_;
+=head2 getEvals
 
-    my @evals = $evals->search(
+This method returns a list of evaluations with details about what changed,
+intended to be used with `eval.tt`.
+
+Arguments:
+
+=over 4
+
+=item C<$c>
+L<Hydra> - the entire application.
+
+=item C<$evals_result_set>
+
+A L<DBIx::Class::ResultSet> for the result class of L<Hydra::Model::DB::JobsetEvals>
+
+=item C<$offset>
+
+Integer offset when selecting evaluations
+
+=item C<$rows>
+
+Integer rows to fetch
+
+=back
+
+=cut
+sub getEvals {
+    my ($c, $evals_result_set, $offset, $rows) = @_;
+
+    my $me = $evals_result_set->current_source_alias;
+
+    my @evals = $evals_result_set->search(
         { hasnewbuilds => 1 },
-        { order_by => "me.id DESC", rows => $rows, offset => $offset
-        , prefetch => { evaluationerror => [  ] } });
+        { order_by => "$me.id DESC", rows => $rows, offset => $offset
+        , prefetch => { evaluationerror => [ ] } });
     my @res = ();
     my $cache = {};
 

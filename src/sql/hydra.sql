@@ -402,9 +402,10 @@ create table CachedGitInputs (
     uri           text not null,
     branch        text not null,
     revision      text not null,
+    isDeepClone   boolean not null,
     sha256hash    text not null,
     storePath     text not null,
-    primary key   (uri, branch, revision)
+    primary key   (uri, branch, revision, isDeepClone)
 );
 
 create table CachedDarcsInputs (
@@ -612,6 +613,9 @@ create index IndexBuildsOnFinished on Builds(finished) where finished = 0;
 create index IndexBuildsOnIsCurrent on Builds(isCurrent) where isCurrent = 1;
 create index IndexBuildsOnJobsetIsCurrent on Builds(project, jobset, isCurrent) where isCurrent = 1;
 create index IndexBuildsOnJobIsCurrent on Builds(project, jobset, job, isCurrent) where isCurrent = 1;
+create index IndexBuildsJobsetIdCurrentUnfinished on Builds(jobset_id) where isCurrent = 1 and finished = 0;
+create index IndexBuildsJobsetIdCurrentFinishedStatus on Builds(jobset_id, buildstatus) where isCurrent = 1 and finished = 1;
+create index IndexBuildsJobsetIdCurrent on Builds(jobset_id) where isCurrent = 1;
 create index IndexBuildsOnJobset on Builds(project, jobset);
 create index IndexBuildsOnProject on Builds(project);
 create index IndexBuildsOnTimestamp on Builds(timestamp);
